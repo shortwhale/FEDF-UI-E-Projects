@@ -25,20 +25,12 @@ span {
   transition: 0.3s;
 }
 
-/* DOM highlight */
-.dom {
-  background: #ff4d4d;
-}
-
-/* VDOM highlight */
-.vdom {
-  background: #00ff99;
-  color: black;
-}
+.dom { background: #ff4d4d; }
+.vdom { background: #00ff99; color: black; }
 
 button {
   padding: 10px 20px;
-  margin: 10px;
+  margin: 5px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -48,7 +40,7 @@ button {
 .domBtn { background: red; color: white; }
 .vdomBtn { background: green; color: white; }
 
-#status {
+#status, #updates {
   margin-top: 10px;
   font-size: 18px;
 }
@@ -66,23 +58,28 @@ button {
     <span id="ones">0</span>
   </h1>
 
-  <button class="domBtn" onclick="useDOM()">DOM (Slow)</button>
-  <button class="vdomBtn" onclick="useVDOM()">VDOM (Fast)</button>
+  <button class="domBtn" onclick="useDOM()">DOM</button>
+  <button class="vdomBtn" onclick="useVDOM()">VDOM</button>
+  <br>
+
+  <button onclick="pause()">Pause</button>
+  <button onclick="resume()">Resume</button>
+  <button onclick="reset()">Reset</button>
 
   <p id="status">Click a mode</p>
+  <p id="updates">Updates: 0</p>
 </div>
 
 <script>
+// ================= STATE =================
 let state = 1;
 let oldState = 1;
-let interval;
+let interval = null;
+let mode = "";
+let running = false;
+let updateCount = 0;
 
-// clear previous
-function clearAll() {
-  clearInterval(interval);
-}
-
-// split digits
+// ================= UTIL =================
 function getDigits(num) {
   return {
     h: Math.floor(num / 100),
@@ -91,59 +88,70 @@ function getDigits(num) {
   };
 }
 
-// render all
-function renderAll(num) {
-  let d = getDigits(num);
-  document.getElementById("hundreds").innerText = d.h;
-  document.getElementById("tens").innerText = d.t;
-  document.getElementById("ones").innerText = d.o;
-}
-
-// highlight
 function flash(id, cls) {
   let el = document.getElementById(id);
   el.classList.add(cls);
   setTimeout(() => el.classList.remove(cls), 200);
 }
 
-// 🔴 DOM MODE (SLOW)
+function updateUI(text) {
+  document.getElementById("status").innerText = text;
+  document.getElementById("updates").innerText =
+    "Updates: " + updateCount;
+}
+
+// ================= COMPONENT STYLE =================
+function setDigit(id, value, type) {
+  document.getElementById(id).innerText = value;
+  flash(id, type);
+  updateCount++;
+}
+
+// ================= CORE =================
+function clearAll() {
+  clearInterval(interval);
+  running = false;
+}
+
+function renderAll(num) {
+  let d = getDigits(num);
+  setDigit("hundreds", d.h, "dom");
+  setDigit("tens", d.t, "dom");
+  setDigit("ones", d.o, "dom");
+}
+
+// ================= MODES =================
 function useDOM() {
   clearAll();
 
+  mode = "DOM";
   state = 1;
-  renderAll(state);
+  updateCount = 0;
 
-  document.getElementById("status").innerText =
-    "DOM Mode (Slow - All update)";
+  renderAll(state);
 
   interval = setInterval(() => {
 
     renderAll(state);
 
-    // all digits blink
-    ["hundreds","tens","ones"].forEach(id => {
-      flash(id, "dom");
-    });
+    updateUI("DOM Mode (All updates): " + state);
 
-    document.getElementById("status").innerText =
-      "DOM Value: " + state;
+    state = state >= 999 ? 1 : state + 1;
 
-    state++;
+  }, 2000);
 
-  }, 2000); // slow
+  running = true;
 }
 
-// 🟢 VDOM MODE (FAST)
 function useVDOM() {
   clearAll();
 
+  mode = "VDOM";
   state = 1;
   oldState = 1;
+  updateCount = 0;
 
   renderAll(state);
-
-  document.getElementById("status").innerText =
-    "VDOM Mode (Fast - Only changed update)";
 
   interval = setInterval(() => {
 
@@ -151,38 +159,53 @@ function useVDOM() {
     let oldD = getDigits(oldState);
 
     if (newD.h !== oldD.h) {
-      document.getElementById("hundreds").innerText = newD.h;
-      flash("hundreds", "vdom");
+      setDigit("hundreds", newD.h, "vdom");
     }
 
     if (newD.t !== oldD.t) {
-      document.getElementById("tens").innerText = newD.t;
-      flash("tens", "vdom");
+      setDigit("tens", newD.t, "vdom");
     }
 
     if (newD.o !== oldD.o) {
-      document.getElementById("ones").innerText = newD.o;
-      flash("ones", "vdom");
+      setDigit("ones", newD.o, "vdom");
     }
 
-    document.getElementById("status").innerText =
-      "VDOM Value: " + state;
+    updateUI("VDOM Mode (Smart updates): " + state);
 
     oldState = state;
-    state++;
+    state = state >= 999 ? 1 : state + 1;
 
-  }, 500); // fast
+  }, 500);
+
+  running = true;
 }
 
-/*
-<!-- TASKS:
-1. Add pause/resume button
-2. Add reset button
-3. Add max limit (999 restart)
-4. Show total updates count
-5. Convert to component-based design
--->
-*/
+// ================= CONTROLS =================
+function pause() {
+  clearInterval(interval);
+  running = false;
+  updateUI("Paused");
+}
+
+function resume() {
+  if (running) return;
+
+  if (mode === "DOM") useDOM();
+  else if (mode === "VDOM") useVDOM();
+}
+
+function reset() {
+  clearAll();
+  state = 1;
+  oldState = 1;
+  updateCount = 0;
+
+  document.getElementById("hundreds").innerText = 0;
+  document.getElementById("tens").innerText = 0;
+  document.getElementById("ones").innerText = 0;
+
+  updateUI("Reset");
+}
 </script>
 
 </body>
