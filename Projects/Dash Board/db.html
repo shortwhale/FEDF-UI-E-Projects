@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="users"></div>
+<div id="cooldrinks"></div>
+
+<script>
+  /*
+<!-- TASKS:
+1. ADD 10 MORE ITEMS WITH DIFFERENT TIME INTERVAL
+-->
+*/
+let state = { 
+  users: 10,
+  cooldrinks: 0 
+};
+
+function render1() {
+  document.getElementById("users").innerText =
+    "Users: " + state.users;
+}
+
+function render2() {
+  document.getElementById("cooldrinks").innerText =
+    "Cooldrinks: " + state.cooldrinks;
+}
+
+// Update users every 2 sec
+setInterval(() => {
+  state.users++;
+  render1();
+}, 2000);
+
+// Update cooldrinks every 1 sec
+setInterval(() => {
+  state.cooldrinks++;
+  render2();
+}, 1000);
+
+// Initial render
+render1();
+render2();
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color: white;
+}
+
+.container {
+  margin-top: 80px;
+}
+
+h1 {
+  font-size: 70px;
+}
+
+span {
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 10px;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+/* DOM highlight */
+.dom {
+  background: #ff4d4d;
+}
+
+/* VDOM highlight */
+.vdom {
+  background: #00ff99;
+  color: black;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.domBtn { background: red; color: white; }
+.vdomBtn { background: green; color: white; }
+
+#status {
+  margin-top: 10px;
+  font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>⚡ DOM vs VDOM Counter</h2>
+
+  <h1>
+    <span id="hundreds">0</span>
+    <span id="tens">0</span>
+    <span id="ones">0</span>
+  </h1>
+
+  <button class="domBtn" onclick="useDOM()">DOM (Slow)</button>
+  <button class="vdomBtn" onclick="useVDOM()">VDOM (Fast)</button>
+
+  <p id="status">Click a mode</p>
+</div>
+
+<script>
+let state = 1;
+let oldState = 1;
+let interval;
+
+// clear previous
+function clearAll() {
+  clearInterval(interval);
+}
+
+// split digits
+function getDigits(num) {
+  return {
+    h: Math.floor(num / 100),
+    t: Math.floor((num % 100) / 10),
+    o: num % 10
+  };
+}
+
+// render all
+function renderAll(num) {
+  let d = getDigits(num);
+  document.getElementById("hundreds").innerText = d.h;
+  document.getElementById("tens").innerText = d.t;
+  document.getElementById("ones").innerText = d.o;
+}
+
+// highlight
+function flash(id, cls) {
+  let el = document.getElementById(id);
+  el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 200);
+}
+
+// 🔴 DOM MODE (SLOW)
+function useDOM() {
+  clearAll();
+
+  state = 1;
+  renderAll(state);
+
+  document.getElementById("status").innerText =
+    "DOM Mode (Slow - All update)";
+
+  interval = setInterval(() => {
+
+    renderAll(state);
+
+    // all digits blink
+    ["hundreds","tens","ones"].forEach(id => {
+      flash(id, "dom");
+    });
+
+    document.getElementById("status").innerText =
+      "DOM Value: " + state;
+
+    state++;
+
+  }, 2000); // slow
+}
+
+// 🟢 VDOM MODE (FAST)
+function useVDOM() {
+  clearAll();
+
+  state = 1;
+  oldState = 1;
+
+  renderAll(state);
+
+  document.getElementById("status").innerText =
+    "VDOM Mode (Fast - Only changed update)";
+
+  interval = setInterval(() => {
+
+    let newD = getDigits(state);
+    let oldD = getDigits(oldState);
+
+    if (newD.h !== oldD.h) {
+      document.getElementById("hundreds").innerText = newD.h;
+      flash("hundreds", "vdom");
+    }
+
+    if (newD.t !== oldD.t) {
+      document.getElementById("tens").innerText = newD.t;
+      flash("tens", "vdom");
+    }
+
+    if (newD.o !== oldD.o) {
+      document.getElementById("ones").innerText = newD.o;
+      flash("ones", "vdom");
+    }
+
+    document.getElementById("status").innerText =
+      "VDOM Value: " + state;
+
+    oldState = state;
+    state++;
+
+  }, 500); // fast
+}
+
+/*
+<!-- TASKS:
+1. Add pause/resume button
+2. Add reset button
+3. Add max limit (999 restart)
+4. Show total updates count
+5. Convert to component-based design
+-->
+*/
+</script>
+
+</body>
+</html>
