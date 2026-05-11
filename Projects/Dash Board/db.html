@@ -3,16 +3,29 @@
 <body>
 <div id="users"></div>
 <div id="cooldrinks"></div>
+<div id="likes"></div>
+<div id="views"></div>
+<div id="messages"></div>
+<div id="orders"></div>
+<div id="sales"></div>
+<div id="comments"></div>
+<div id="visits"></div>
+<div id="downloads"></div>
+<div id="shares"></div>
 
 <script>
-  /*
-<!-- TASKS:
-1. ADD 10 MORE ITEMS WITH DIFFERENT TIME INTERVAL
--->
-*/
 let state = { 
   users: 10,
-  cooldrinks: 0 
+  cooldrinks: 0,
+  likes: 0,
+  views: 0,
+  messages: 0,
+  orders: 0,
+  sales: 0,
+  comments: 0,
+  visits: 0,
+  downloads: 0,
+  shares: 0
 };
 
 function render1() {
@@ -25,22 +38,86 @@ function render2() {
     "Cooldrinks: " + state.cooldrinks;
 }
 
-// Update users every 2 sec
+function renderLikes() {
+  document.getElementById("likes").innerText =
+    "Likes: " + state.likes;
+}
+
+function renderViews() {
+  document.getElementById("views").innerText =
+    "Views: " + state.views;
+}
+
+function renderMessages() {
+  document.getElementById("messages").innerText =
+    "Messages: " + state.messages;
+}
+
+function renderOrders() {
+  document.getElementById("orders").innerText =
+    "Orders: " + state.orders;
+}
+
+function renderSales() {
+  document.getElementById("sales").innerText =
+    "Sales: " + state.sales;
+}
+
+function renderComments() {
+  document.getElementById("comments").innerText =
+    "Comments: " + state.comments;
+}
+
+function renderVisits() {
+  document.getElementById("visits").innerText =
+    "Visits: " + state.visits;
+}
+
+function renderDownloads() {
+  document.getElementById("downloads").innerText =
+    "Downloads: " + state.downloads;
+}
+
+function renderShares() {
+  document.getElementById("shares").innerText =
+    "Shares: " + state.shares;
+}
+
+// Existing intervals
 setInterval(() => {
   state.users++;
   render1();
 }, 2000);
 
-// Update cooldrinks every 1 sec
 setInterval(() => {
   state.cooldrinks++;
   render2();
 }, 1000);
 
+// 10 NEW ITEMS with different intervals
+
+setInterval(() => { state.likes++; renderLikes(); }, 1500);
+setInterval(() => { state.views++; renderViews(); }, 2500);
+setInterval(() => { state.messages++; renderMessages(); }, 3000);
+setInterval(() => { state.orders++; renderOrders(); }, 3500);
+setInterval(() => { state.sales++; renderSales(); }, 4000);
+setInterval(() => { state.comments++; renderComments(); }, 4500);
+setInterval(() => { state.visits++; renderVisits(); }, 5000);
+setInterval(() => { state.downloads++; renderDownloads(); }, 5500);
+setInterval(() => { state.shares++; renderShares(); }, 6000);
+
 // Initial render
 render1();
 render2();
-
+renderLikes();
+renderViews();
+renderMessages();
+renderOrders();
+renderSales();
+renderComments();
+renderVisits();
+renderDownloads();
+renderShares();
 
 </script>
 
